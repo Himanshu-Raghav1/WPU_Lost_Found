@@ -3,7 +3,7 @@ import Google from "@auth/core/providers/google";
 import { Email } from "@convex-dev/auth/providers/Email";
 import { Password } from "@convex-dev/auth/providers/Password";
 
-const BREVO_API_KEY = process.env.AUTH_BREVO_KEY;
+const BREVO_API_KEY = process.env.AUTH_BREVO_KEY || "";
 
 // SHA-256 Hashing helper using Web Crypto API (supported natively in Convex runtime)
 export async function hashPassword(password: string): Promise<string> {
