@@ -67,28 +67,30 @@ export default function ReportItem() {
     <div style={{ minHeight: '100vh', background: '#f4f6fa', paddingBottom: '3rem' }}>
       {/* Top Banner */}
       <nav className="wpu-nav">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="wpu-nav-brand">
           <div className="logo-circle-sm">
             <img src={mitLogo} alt="MIT World Peace University" />
           </div>
           <div>
-            <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--wpu-navy)' }}>
-              Lost & Found Portal
+            <div className="wpu-nav-title">
+              Lost &amp; Found Portal
             </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+            <div className="wpu-nav-subtitle">
               Report Item Form
             </div>
           </div>
         </div>
 
-        <Link to="/dashboard" className="btn btn-outline" style={{ fontSize: '0.85rem' }}>
-          <ArrowLeft size={16} /> Back to Feed
-        </Link>
+        <div className="wpu-nav-actions">
+          <Link to="/dashboard" className="btn btn-outline btn-sm">
+            <ArrowLeft size={16} /> Back to Feed
+          </Link>
+        </div>
       </nav>
 
       <div className="container" style={{ maxWidth: '650px', marginTop: '2rem' }}>
-        <div className="wpu-panel animate-fade-in" style={{ padding: '2.5rem' }}>
-          <div style={{ marginBottom: '2rem', borderBottom: '2px solid var(--border-subtle)', paddingBottom: '1rem' }}>
+        <div className="wpu-panel animate-fade-in" style={{ padding: '2rem 1.5rem' }}>
+          <div style={{ marginBottom: '2rem', borderBottom: '2px solid var(--border-subtle)', paddingBottom: '1rem', textAlign: 'center' }}>
             <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--wpu-navy)', letterSpacing: '-0.02em' }}>
               Official Item Report Form
             </h1>
@@ -167,10 +169,10 @@ export default function ReportItem() {
                   onChange={(e) => setCategory(e.target.value)}
                 >
                   <option value="electronics">Electronics</option>
-                  <option value="clothing">Clothing & Bags</option>
-                  <option value="id-card">ID Card & Documents</option>
-                  <option value="keys">Keys & Wallets</option>
-                  <option value="books">Stationery & Books</option>
+                  <option value="clothing">Clothing &amp; Bags</option>
+                  <option value="id-card">ID Card &amp; Documents</option>
+                  <option value="keys">Keys &amp; Wallets</option>
+                  <option value="books">Stationery &amp; Books</option>
                   <option value="other">Other</option>
                 </select>
               </div>
@@ -194,13 +196,13 @@ export default function ReportItem() {
                 className="form-input"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="e.g. Vyas Building, 3rd Floor Lab 304 /Encave Chanakya"
+                placeholder="e.g. Vyas Building, 3rd Floor Lab 304 / Chanakya"
                 required
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Description & Identification Details</label>
+              <label className="form-label">Description &amp; Identification Details</label>
               <textarea
                 className="form-input form-textarea"
                 value={description}

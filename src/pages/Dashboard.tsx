@@ -33,120 +33,90 @@ export default function Dashboard() {
   });
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f4f6fa' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Official MIT-WPU Header Bar */}
       <nav className="wpu-nav">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="wpu-nav-brand">
           <div className="logo-circle-sm">
             <img src={mitLogo} alt="MIT World Peace University" />
           </div>
           <div>
-            <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--wpu-navy)', letterSpacing: '-0.01em' }}>
-              Lost & Found Portal
+            <div className="wpu-nav-title">
+              Lost &amp; Found Portal
             </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+            <div className="wpu-nav-subtitle">
               College Administration System (CAS)
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <div style={{ textAlign: 'right', marginRight: '0.5rem' }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--wpu-navy)' }}>
+        <div className="wpu-nav-user">
+          <div className="wpu-nav-user-info">
+            <div className="wpu-user-name">
               {user?.name || 'Student'} (PRN: {user?.prn || '---'})
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{user?.email}</div>
+            <div className="wpu-user-email">{user?.email}</div>
           </div>
           
-          <Link to="/report" className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
-            <Plus size={16} /> Report Item
-          </Link>
-          
-          <button 
-            className="btn btn-outline" 
-            style={{ padding: '0.5rem 0.8rem', fontSize: '0.85rem' }}
-            onClick={() => signOut()} 
-            title="Sign Out"
-          >
-            <LogOut size={16} /> Sign Out
-          </button>
+          <div className="wpu-nav-actions">
+            <Link to="/report" className="btn btn-primary btn-sm">
+              <Plus size={16} /> Report Item
+            </Link>
+            
+            <button 
+              className="btn btn-outline btn-sm" 
+              onClick={() => signOut()} 
+              title="Sign Out"
+            >
+              <LogOut size={16} /> Sign Out
+            </button>
+          </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <main className="container" style={{ padding: '2.5rem 1.5rem', flex: 1 }}>
+      <main className="container dashboard-main">
         
         {/* Title & Search Bar */}
-        <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h1 style={{ fontSize: '2rem', fontWeight: 700, color: '#1d2b56', letterSpacing: '-0.02em' }}>
-              Campus Feed & Reports
+        <div className="dashboard-header">
+          <div className="dashboard-header-text">
+            <h1 className="dashboard-title">
+              Campus Feed &amp; Reports
             </h1>
-            <p style={{ marginTop: '0.2rem', fontSize: '0.98rem', color: 'var(--text-secondary)' }}>
+            <p className="dashboard-subtitle">
               Search for items reported across MIT WPU Pune campus buildings.
             </p>
           </div>
 
           {/* Search & Filters */}
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <div style={{ position: 'relative', minWidth: '240px' }}>
-              <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+          <div className="dashboard-search-filters">
+            <div className="dashboard-search-wrapper">
+              <Search size={16} className="dashboard-search-icon" />
               <input 
                 type="text" 
-                className="form-input" 
+                className="form-input dashboard-search-input" 
                 placeholder="Search location, item..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ paddingLeft: '2.2rem', padding: '0.5rem 0.8rem 0.5rem 2.2rem', borderRadius: 'var(--radius-full)' }}
               />
             </div>
 
-            <div style={{ display: 'flex', background: '#e2e8f0', borderRadius: 'var(--radius-full)', padding: '3px' }}>
+            <div className="dashboard-filter-tabs">
               <button 
                 onClick={() => setFilterType('all')} 
-                style={{ 
-                  border: 'none', 
-                  background: filterType === 'all' ? 'var(--wpu-navy)' : 'transparent', 
-                  color: filterType === 'all' ? '#fff' : 'var(--text-primary)',
-                  padding: '0.4rem 0.9rem', 
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: '0.85rem',
-                  fontWeight: filterType === 'all' ? 700 : 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
+                className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
               >
                 All
               </button>
               <button 
                 onClick={() => setFilterType('lost')} 
-                style={{ 
-                  border: 'none', 
-                  background: filterType === 'lost' ? '#dc2626' : 'transparent', 
-                  color: filterType === 'lost' ? '#fff' : 'var(--text-primary)',
-                  padding: '0.4rem 0.9rem', 
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: '0.85rem',
-                  fontWeight: filterType === 'lost' ? 700 : 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
+                className={`filter-btn filter-lost ${filterType === 'lost' ? 'active' : ''}`}
               >
                 Lost
               </button>
               <button 
                 onClick={() => setFilterType('found')} 
-                style={{ 
-                  border: 'none', 
-                  background: filterType === 'found' ? '#16a34a' : 'transparent', 
-                  color: filterType === 'found' ? '#fff' : 'var(--text-primary)',
-                  padding: '0.4rem 0.9rem', 
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: '0.85rem',
-                  fontWeight: filterType === 'found' ? 700 : 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
+                className={`filter-btn filter-found ${filterType === 'found' ? 'active' : ''}`}
               >
                 Found
               </button>
@@ -201,7 +171,7 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div className="wpu-card-footer" style={{ paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.82rem', color: 'var(--text-primary)', fontWeight: 600 }}>
                       Reporter: {item.reporterName || 'Student'} (PRN: {item.reporterPrn || '---'})
                     </span>
