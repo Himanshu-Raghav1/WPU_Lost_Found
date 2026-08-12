@@ -26,10 +26,14 @@ export default function Dashboard() {
   };
 
   const filteredItems = items.filter((item) => {
+    if (!item) return false;
+    const title = item.title || '';
+    const description = item.description || '';
+    const location = item.location || '';
     const matchesType = filterType === 'all' || item.type === filterType;
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          item.location.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          location.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesType && matchesSearch;
   });
 

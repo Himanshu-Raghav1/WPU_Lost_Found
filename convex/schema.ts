@@ -30,8 +30,8 @@ export default defineSchema({
     imageId: v.optional(v.id("_storage")),
     reporterId: v.id("users"),
 
-    // Moderation
-    approvalStatus: v.string(), // "pending" | "approved" | "rejected"
+    // Moderation (optional for backwards-compatibility with existing items)
+    approvalStatus: v.optional(v.string()), // "pending" | "approved" | "rejected"
     rejectionReason: v.optional(v.string()),
 
     // Matching & resolution

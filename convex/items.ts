@@ -101,20 +101,28 @@ export const getAllItems = query({
     const userId = await auth.getUserId(ctx);
     const isAdminUser = await checkIsAdmin(ctx, userId);
 
-    const items = await ctx.db
+    const allItems = await ctx.db
       .query("items")
-      .withIndex("byStatus", (q) => q.eq("approvalStatus", "approved"))
       .order("desc")
       .collect();
+
+    // Include items that are approved OR items that don't have approvalStatus set (legacy items)
+    const items = allItems.filter(
+      (item) => item.approvalStatus === "approved" || !item.approvalStatus
+    );
 
     return Promise.all(
       items.map(async (item) => {
         // For found items: only admins see the actual photo
         const showImage = isAdminUser || item.type !== "found";
-        const imageUrl =
-          item.imageId && showImage
-            ? await ctx.storage.getUrl(item.imageId)
-            : null;
+        let imageUrl = null;
+        if (item.imageId && showImage) {
+          try {
+            imageUrl = await ctx.storage.getUrl(item.imageId);
+          } catch {
+            imageUrl = null;
+          }
+        }
 
         return {
           ...item,

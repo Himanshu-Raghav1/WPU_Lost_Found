@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from 'convex/react';
+import { Navigate } from 'react-router-dom';
 import { api } from '../../convex/_generated/api';
 import { useAuthActions } from '@convex-dev/auth/react';
 
@@ -21,8 +22,14 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     );
   }
 
+  // User record missing (e.g. stale token or cleared database)
+  if (user === null) {
+    signOut();
+    return <Navigate to="/login" replace />;
+  }
+
   // PRN or Name missing (e.g. after Google or Resend OTP login)
-  if (user !== null && (!user.prn || !user.name)) {
+  if (!user.prn || !user.name) {
     const handleProfileSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       const prnToSave = user.prn || prnInput.trim();
