@@ -3,12 +3,13 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { Link } from 'react-router-dom';
 import { useAuthActions } from '@convex-dev/auth/react';
-import { LogOut, Plus, MapPin, Calendar, CheckCircle, Search } from 'lucide-react';
+import { LogOut, Plus, MapPin, Calendar, CheckCircle, Search, Shield, Lock } from 'lucide-react';
 import mitLogo from '../assets/mit_logo.png';
 
 export default function Dashboard() {
   const items = useQuery(api.items.getAllItems) || [];
   const user = useQuery(api.users.current);
+  const isAdmin = useQuery(api.admin.isAdmin);
   const resolveItem = useMutation(api.items.resolveItem);
   const { signOut } = useAuthActions();
 
@@ -59,6 +60,11 @@ export default function Dashboard() {
           </div>
           
           <div className="wpu-nav-actions">
+            {isAdmin && (
+              <Link to="/admin" className="btn btn-sm" style={{ background: '#7c3aed', color: '#fff' }}>
+                <Shield size={16} /> Admin Panel
+              </Link>
+            )}
             <Link to="/report" className="btn btn-primary btn-sm">
               <Plus size={16} /> Report Item
             </Link>
@@ -136,15 +142,18 @@ export default function Dashboard() {
           <div className="grid-2">
             {filteredItems.map((item) => (
               <div key={item._id} className="wpu-card animate-fade-in" style={{ display: 'flex', flexDirection: 'column' }}>
-                {item.imageUrl && (
-                  <div style={{ width: '100%', height: '220px', background: '#f8fafc', overflow: 'hidden', borderBottom: '1px solid var(--border-color)' }}>
-                    <img 
-                      src={item.imageUrl} 
-                      alt={item.title} 
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
+                {/* Found items: image is hidden from public (only admin sees it via backend) */}
+                {item.type === 'found' && item.imageId && !item.imageUrl ? (
+                  <div style={{ width: '100%', padding: '0.85rem 1.25rem', background: '#f0f9ff', borderBottom: '1px solid #bae6fd', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <Lock size={15} color="#0369a1" />
+                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0369a1' }}>Photo hidden for anti-theft security — verified by Admin</span>
                   </div>
-                )}
+                ) : item.imageUrl ? (
+                  <div style={{ width: '100%', height: '220px', background: '#f8fafc', overflow: 'hidden', borderBottom: '1px solid var(--border-color)' }}>
+                    <img src={item.imageUrl} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                ) : null}
+
                 
                 <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>

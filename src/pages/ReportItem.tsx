@@ -16,9 +16,20 @@ export default function ReportItem() {
   const [type, setType] = useState<'lost' | 'found'>('lost');
   const [location, setLocation] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [phone, setPhone] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleFileChange = (f: File | null) => {
+    if (f && f.size > 3 * 1024 * 1024) {
+      setError('Image file is too large. Maximum allowed size is 3 MB.');
+      setFile(null);
+      return;
+    }
+    setError('');
+    setFile(f);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +62,9 @@ export default function ReportItem() {
         type,
         location,
         date,
+        phone: phone || undefined,
         imageId,
+        imageSizeBytes: file ? file.size : undefined,
       });
 
       navigate('/dashboard');
@@ -212,14 +225,28 @@ export default function ReportItem() {
               />
             </div>
 
+            {/* Phone Number */}
             <div className="form-group">
-              <label className="form-label">Photo Attachment (Convex Storage)</label>
+              <label className="form-label">Your Contact Phone Number <span style={{ color: '#dc2626' }}>*</span></label>
+              <input
+                type="tel"
+                className="form-input"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. 9876543210"
+                required
+              />
+              <p style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '0.2rem' }}>Visible only to Admin for follow-up. Never shown publicly.</p>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Photo Attachment <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>(Max 3 MB)</span></label>
               <div style={{ border: '1px dashed var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '1.5rem', textAlign: 'center', background: '#f8fafc' }}>
                 <input
                   type="file"
                   id="file-upload"
                   accept="image/*"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
                   style={{ display: 'none' }}
                 />
                 <label htmlFor="file-upload" className="btn btn-secondary" style={{ cursor: 'pointer', display: 'inline-flex' }}>
@@ -230,18 +257,27 @@ export default function ReportItem() {
                     Attached: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
                   </p>
                 )}
+                <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.5rem' }}>Maximum file size: 3 MB</p>
               </div>
             </div>
 
             {error && <p className="text-error" style={{ marginBottom: '1rem' }}>{error}</p>}
 
+            {/* Pending approval notice */}
+            <div style={{ background: '#fefce8', border: '1px solid #fde047', borderRadius: '10px', padding: '0.85rem 1.1rem', marginBottom: '1rem', display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1.1rem' }}>⏳</span>
+              <p style={{ fontSize: '0.82rem', color: '#92400e', lineHeight: 1.5 }}>
+                <strong>Admin Review Required:</strong> Your report will first go to the Campus Admin for review. It will appear on the public feed only after approval.
+              </p>
+            </div>
+
             <button
               type="submit"
               className="btn btn-primary"
-              style={{ width: '100%', padding: '0.8rem', marginTop: '1rem', fontSize: '1rem' }}
+              style={{ width: '100%', padding: '0.8rem', marginTop: '0.5rem', fontSize: '1rem' }}
               disabled={loading}
             >
-              {loading ? 'Submitting Report...' : 'Publish Official Report'}
+              {loading ? 'Submitting for Review...' : 'Submit Report for Admin Approval'}
             </button>
           </form>
         </div>
