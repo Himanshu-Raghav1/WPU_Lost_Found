@@ -67,7 +67,6 @@ export default function AdminDashboard() {
   };
 
   const approvedCount = allItems.filter(i => (i.approvalStatus || 'approved') === 'approved').length;
-  const pendingCount = allItems.filter(i => i.approvalStatus === 'pending').length;
   const rejectedCount = allItems.filter(i => i.approvalStatus === 'rejected').length;
   const resolvedCount = allItems.filter(i => i.status === 'resolved').length;
 
