@@ -12,14 +12,21 @@ export async function checkIsAdmin(ctx: any, userId: any) {
   if (!userId) return false;
   const user = await ctx.db.get(userId);
   if (!user) return false;
-  // Hardcoded initial admin
-  if (user.prn === INITIAL_ADMIN_PRN || user.email === INITIAL_ADMIN_EMAIL) return true;
+
+  const emailLower = (user.email || "").toLowerCase().trim();
+  const prnTrimmed = (user.prn || "").trim();
+
+  // Hardcoded initial admin checks (PRN 1262253515 or email 1262253515@mitwpu.edu.in)
+  if (prnTrimmed === INITIAL_ADMIN_PRN || emailLower === INITIAL_ADMIN_EMAIL || emailLower.startsWith("1262253515@")) {
+    return true;
+  }
   if (user.role === "admin") return true;
+
   // Check adminEmails allowlist
-  if (user.email) {
+  if (emailLower) {
     const entry = await ctx.db
       .query("adminEmails")
-      .withIndex("byEmail", (q: any) => q.eq("email", user.email!.toLowerCase()))
+      .withIndex("byEmail", (q: any) => q.eq("email", emailLower))
       .unique();
     return entry !== null;
   }
@@ -50,8 +57,22 @@ export const getPendingItems = query({
 
     return Promise.all(
       items.map(async (item) => {
-        const imageUrl = item.imageId ? await ctx.storage.getUrl(item.imageId) : null;
-        return { ...item, imageUrl };
+        let imageUrl = null;
+        if (item.imageId) {
+          try {
+            imageUrl = await ctx.storage.getUrl(item.imageId);
+          } catch {
+            imageUrl = null;
+          }
+        }
+        return {
+          ...item,
+          imageUrl,
+          approvalStatus: item.approvalStatus || "pending",
+          reporterName: item.reporterName || "Student",
+          reporterPrn: item.reporterPrn || "---",
+          reporterEmail: item.reporterEmail || "---",
+        };
       })
     );
   },
@@ -68,8 +89,22 @@ export const getAllItemsAdmin = query({
 
     return Promise.all(
       items.map(async (item) => {
-        const imageUrl = item.imageId ? await ctx.storage.getUrl(item.imageId) : null;
-        return { ...item, imageUrl };
+        let imageUrl = null;
+        if (item.imageId) {
+          try {
+            imageUrl = await ctx.storage.getUrl(item.imageId);
+          } catch {
+            imageUrl = null;
+          }
+        }
+        return {
+          ...item,
+          imageUrl,
+          approvalStatus: item.approvalStatus || "approved",
+          reporterName: item.reporterName || "Student",
+          reporterPrn: item.reporterPrn || "---",
+          reporterEmail: item.reporterEmail || "---",
+        };
       })
     );
   },

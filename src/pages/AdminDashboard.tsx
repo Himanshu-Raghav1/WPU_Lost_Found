@@ -17,6 +17,9 @@ export default function AdminDashboard() {
   const [confirmingMatch, setConfirmingMatch] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
+  const [allSearch, setAllSearch] = useState('');
+  const [allFilter, setAllFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'resolved'>('all');
+
   const pendingItems = useQuery(api.admin.getPendingItems) ?? [];
   const allItems = useQuery(api.admin.getAllItemsAdmin) ?? [];
   const adminEmails = useQuery(api.admin.getAdminEmails) ?? [];
@@ -63,9 +66,29 @@ export default function AdminDashboard() {
     finally { setConfirmingMatch(null); }
   };
 
-  const approvedCount = allItems.filter(i => i.approvalStatus === 'approved').length;
+  const approvedCount = allItems.filter(i => (i.approvalStatus || 'approved') === 'approved').length;
+  const pendingCount = allItems.filter(i => i.approvalStatus === 'pending').length;
   const rejectedCount = allItems.filter(i => i.approvalStatus === 'rejected').length;
   const resolvedCount = allItems.filter(i => i.status === 'resolved').length;
+
+  const filteredAllItems = allItems.filter((i) => {
+    const statusStr = (i.approvalStatus || 'approved').toLowerCase();
+    const matchesFilter =
+      allFilter === 'all' ||
+      (allFilter === 'resolved' ? i.status === 'resolved' : statusStr === allFilter);
+
+    const queryStr = allSearch.trim().toLowerCase();
+    const matchesSearch =
+      !queryStr ||
+      (i.title || '').toLowerCase().includes(queryStr) ||
+      (i.description || '').toLowerCase().includes(queryStr) ||
+      (i.reporterName || '').toLowerCase().includes(queryStr) ||
+      (i.reporterPrn || '').toLowerCase().includes(queryStr) ||
+      (i.reporterEmail || '').toLowerCase().includes(queryStr) ||
+      (i.location || '').toLowerCase().includes(queryStr);
+
+    return matchesFilter && matchesSearch;
+  });
 
   return (
     <div style={{ minHeight: '100vh', background: '#f0f2f8', display: 'flex', flexDirection: 'column' }}>
@@ -236,48 +259,84 @@ export default function AdminDashboard() {
         {/* ── ALL REPORTS TAB ──────────────────────────────────────── */}
         {activeTab === 'all' && (
           <div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1d2b56', marginBottom: '1.5rem' }}>
-              All Reports — Full Admin View
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {allItems.map((item: any) => (
-                <div key={item._id} className="wpu-card" style={{ padding: '1.25rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                        <span className={`badge ${item.type === 'lost' ? 'badge-lost' : 'badge-found'}`}>
-                          {item.type === 'lost' ? 'LOST' : 'FOUND'}
-                        </span>
-                        <span style={{
-                          fontSize: '0.72rem', fontWeight: 700, padding: '2px 10px', borderRadius: '99px',
-                          background: item.approvalStatus === 'approved' ? '#dcfce7' : item.approvalStatus === 'pending' ? '#fef3c7' : '#fee2e2',
-                          color: item.approvalStatus === 'approved' ? '#16a34a' : item.approvalStatus === 'pending' ? '#b45309' : '#dc2626',
-                        }}>
-                          {item.approvalStatus.toUpperCase()}
-                        </span>
-                        {item.status === 'resolved' && (
-                          <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 10px', borderRadius: '99px', background: '#eff6ff', color: '#2563eb' }}>
-                            RESOLVED
-                          </span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1d2b56' }}>
+                All Reports — Full Admin Audit View
+              </h2>
+
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Search PRN, email, title..."
+                  value={allSearch}
+                  onChange={(e) => setAllSearch(e.target.value)}
+                  style={{ width: '220px', padding: '0.5rem 0.8rem', fontSize: '0.85rem' }}
+                />
+                <select
+                  className="form-input"
+                  value={allFilter}
+                  onChange={(e: any) => setAllFilter(e.target.value)}
+                  style={{ width: '150px', padding: '0.5rem 0.8rem', fontSize: '0.85rem' }}
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="resolved">Resolved</option>
+                </select>
+              </div>
+            </div>
+
+            {filteredAllItems.length === 0 ? (
+              <div className="wpu-card" style={{ padding: '3rem', textAlign: 'center' }}>
+                <h3 style={{ color: '#64748b' }}>No matching reports found</h3>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {filteredAllItems.map((item: any) => {
+                  const statusStr = (item.approvalStatus || 'approved').toLowerCase();
+                  return (
+                    <div key={item._id} className="wpu-card" style={{ padding: '1.25rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                            <span className={`badge ${item.type === 'lost' ? 'badge-lost' : 'badge-found'}`}>
+                              {(item.type || 'lost').toUpperCase()}
+                            </span>
+                            <span style={{
+                              fontSize: '0.72rem', fontWeight: 700, padding: '2px 10px', borderRadius: '99px',
+                              background: statusStr === 'approved' ? '#dcfce7' : statusStr === 'pending' ? '#fef3c7' : '#fee2e2',
+                              color: statusStr === 'approved' ? '#16a34a' : statusStr === 'pending' ? '#b45309' : '#dc2626',
+                            }}>
+                              {statusStr.toUpperCase()}
+                            </span>
+                            {item.status === 'resolved' && (
+                              <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 10px', borderRadius: '99px', background: '#eff6ff', color: '#2563eb' }}>
+                                RESOLVED
+                              </span>
+                            )}
+                          </div>
+                          <strong style={{ color: '#1d2b56', fontSize: '1rem' }}>{item.title || 'Untitled'}</strong>
+                          <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.3rem 0 0.6rem 0' }}>{item.description}</p>
+                          <div style={{ fontSize: '0.82rem', color: '#64748b', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                            <span><User size={12} style={{ marginRight: 4 }} />{item.reporterName || 'Student'} · {item.reporterPrn || '---'}</span>
+                            <span><Mail size={12} style={{ marginRight: 4 }} />{item.reporterEmail || '---'}</span>
+                            {item.reporterPhone && <span><Phone size={12} style={{ marginRight: 4 }} />{item.reporterPhone}</span>}
+                            <span><MapPin size={12} style={{ marginRight: 4 }} />{item.location || 'Campus'}</span>
+                          </div>
+                        </div>
+                        {item.imageUrl && (
+                          <img src={item.imageUrl} alt={item.title}
+                            style={{ width: '90px', height: '70px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                          />
                         )}
                       </div>
-                      <strong style={{ color: '#1d2b56', fontSize: '1rem' }}>{item.title}</strong>
-                      <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '0.4rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-                        <span><User size={12} style={{ marginRight: 4 }} />{item.reporterName} · {item.reporterPrn}</span>
-                        <span><Mail size={12} style={{ marginRight: 4 }} />{item.reporterEmail}</span>
-                        {item.reporterPhone && <span><Phone size={12} style={{ marginRight: 4 }} />{item.reporterPhone}</span>}
-                        <span><MapPin size={12} style={{ marginRight: 4 }} />{item.location}</span>
-                      </div>
                     </div>
-                    {item.imageUrl && (
-                      <img src={item.imageUrl} alt={item.title}
-                        style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                      />
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 

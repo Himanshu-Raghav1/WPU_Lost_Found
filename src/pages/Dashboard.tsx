@@ -25,6 +25,17 @@ export default function Dashboard() {
     }
   };
 
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return 'Recently';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
+
   const filteredItems = items.filter((item) => {
     if (!item) return false;
     const title = item.title || '';
@@ -180,7 +191,7 @@ export default function Dashboard() {
                       <MapPin size={15} color="var(--wpu-navy)" /> <strong style={{ color: 'var(--wpu-navy)' }}>Location:</strong> <span>{item.location}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <Calendar size={15} color="var(--wpu-navy)" /> <strong style={{ color: 'var(--wpu-navy)' }}>Date:</strong> <span>{new Date(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                      <Calendar size={15} color="var(--wpu-navy)" /> <strong style={{ color: 'var(--wpu-navy)' }}>Date:</strong> <span>{formatDate(item.date)}</span>
                     </div>
                   </div>
 
